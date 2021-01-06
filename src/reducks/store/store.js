@@ -3,7 +3,7 @@ import {
   combineReducers,
   applyMiddleware,
 } from "redux";
-
+import thunk from "redux-thunk";
 import { connectRouter, routerMiddleware } from "connected-react-router";
 
 //import reducers
@@ -17,6 +17,6 @@ export default function createStore(history) {
       router: connectRouter(history),
       users: UsersReducer,
     }),
-    applyMiddleware(routerMiddleware(history))
+    applyMiddleware(routerMiddleware(history), thunk) //도입하고 싶은 미들웨어 수만큼 추가 가능.
   );
 }
