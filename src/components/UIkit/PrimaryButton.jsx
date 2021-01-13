@@ -20,7 +20,7 @@ const PrimaryButton = (props) => {
     <Button
       className={classes.button}
       variant="contained"
-      onClick={() => props.onClick()}
+      onClick={() => props.onClick()} //매번 새로운 함수를 props로 넘겨줄거임
     >
       {props.label}
     </Button>
