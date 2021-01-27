@@ -1,6 +1,38 @@
-import { signInAction } from "./actions";
+import { signInAction, signOutAction } from "./actions";
 import { push } from "connected-react-router";
 import { auth, db, FirebaseTimestamp } from "../../firebase/index";
+
+export const listenAuthState = () => {
+  //redux-thunk의 기본형
+  return async (dispatch) => {
+    return auth.onAuthStateChanged((user) => {
+      //유저가 인증을 완료한 상태라면이라는 뜻 (조건문 만약 인증이 아니라면 null)
+      //만약 user가 있다면 redux store에 받아 온 정보로 redux store의 상태를 갱신
+      //만약 user 가 없으면 signIn 하라고 그 페이지로 보내버린다.
+      if (user) {
+        const uid = user.uid;
+
+        db.collection("users")
+          .doc(uid)
+          .get()
+          .then((snapshot) => {
+            const data = snapshot.data();
+
+            dispatch(
+              signInAction({
+                isSignedIn: true,
+                role: data.role,
+                uid: uid,
+                username: data.username,
+              })
+            );
+          });
+      } else {
+        dispatch(push("/signin"));
+      }
+    });
+  };
+};
 
 export const signIn = (email, password) => {
   return async (dispatch) => {
@@ -11,6 +43,7 @@ export const signIn = (email, password) => {
     }
 
     auth.signInWithEmailAndPassword(email, password).then((result) => {
+      console.log(result);
       const user = result.user;
 
       if (user) {
@@ -105,5 +138,14 @@ export const signUp = (username, email, password, confirmPassword) => {
             });
         }
       });
+  };
+};
+
+export const signOut = () => {
+  return async (dispatch) => {
+    auth.signOut().then(() => {
+      dispatch(signOutAction());
+      dispatch(push("/signin"));
+    });
   };
 };
